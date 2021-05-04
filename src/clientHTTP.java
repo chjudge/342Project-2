@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Scanner;
+
 
 public class clientHTTP {
     private static String host;
@@ -56,11 +58,37 @@ public class clientHTTP {
             }
 
             System.out.println(sb.toString());
+            
+            String newStr = PARSE(sb.toString());
+            
+            System.out.println("Parsed String: " + newStr);
 
 
             mySocket.close();
         } catch (IOException e) {
             System.err.println("Error: Connection terminated unexpectedly");
         }
+    }
+    
+    public static String PARSE(String str) {
+    	
+    	String newStr = "";
+    	
+    	Scanner scan = new Scanner(str);
+    	while (scan.hasNext()) {
+    		String curr = scan.next();
+    		
+    		if (curr.equals("Connection:")) {
+    			scan.nextLine();
+    			scan.nextLine();
+    			break;
+    		}
+    	}
+    	
+    	while (scan.hasNextLine()) {
+    		newStr += scan.nextLine() + "\n";
+    	}
+    	
+    	return newStr;
     }
 }
