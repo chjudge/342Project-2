@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Date;
 
 public class serverHTTP {
     private final static int port = 80;
@@ -19,15 +20,16 @@ public class serverHTTP {
             // create a ServerSocket object connected to port 80
             ServerSocket serverSocket = new ServerSocket(port);
 
-            for (;;) {
+            while(true) {
+                System.out.println("Listening for connection on port " + port + "...");
                 // This socket is only created when a client connects to this server
-                Socket mySocket = serverSocket.accept();
-
-                InputStreamReader streamReader = new InputStreamReader(mySocket.getInputStream());
-
+                Socket socket = serverSocket.accept();
+                
+                //read data over the socket
+                InputStreamReader streamReader = new InputStreamReader(socket.getInputStream());
                 BufferedReader reader = new BufferedReader(streamReader);
-
-                PrintWriter writer = new PrintWriter(mySocket.getOutputStream());
+                //write data over the socket
+                PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
 
                 String line = reader.readLine();            
                 while (!line.isEmpty()) {
@@ -35,7 +37,16 @@ public class serverHTTP {
                     line = reader.readLine();
                 }
 
-                // mySocket.close();
+                Date date = new Date();
+                String response = "HTTP/1.1 200 OK\r\n\r\n" + date;
+                writer.write(response);
+                writer.flush();
+
+                //close everything
+                reader.close();
+                streamReader.close();
+                writer.close();
+                socket.close();
             }
 
             // serverSocket.close();
