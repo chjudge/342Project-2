@@ -67,7 +67,7 @@ public class clientHTTP {
             boolean fileExists = PARSE(reader);
 
 
-            System.out.println(path);
+//            System.out.println(path);
 
             // save to path
             if (fileExists) {
