@@ -14,9 +14,11 @@ import java.util.Scanner;
 
 
 public class clientHTTP {
+	
     private static String host;
     private static String path = null;
     private final static int port = 80;
+    
     public static void main(String[] args) {
         //return if no host specified
         if (args.length < 1) {
@@ -28,7 +30,7 @@ public class clientHTTP {
 
         if (args.length > 1) {
             path = args[1];
-        } else {
+        } else { //default
         	path = "index.html";
         }
         try {
@@ -48,8 +50,8 @@ public class clientHTTP {
             writer.println("Connection: Close");
             writer.println();
 
-//            System.out.println("response:");
 
+            //puts server response in string builder
             StringBuilder sb = new StringBuilder();
 
             for (int i = 0;;) {
@@ -61,6 +63,8 @@ public class clientHTTP {
                     break;
                 }
             }
+            
+            System.out.println(getSub("yet.txt"));
 
             //run the parse on the server response
             String newStr = PARSE(sb.toString());
@@ -119,6 +123,8 @@ public class clientHTTP {
     
     public static void SAVE(String str, String path) throws IOException {
     	
+    	path = getSub(path);
+    	
         File out = new File(path); //open file 
         FileOutputStream fOut = new FileOutputStream(out);
         
@@ -129,5 +135,21 @@ public class clientHTTP {
        
         fOut.flush();
         fOut.close();
+    }
+    
+    public static String getSub(String path) {
+    	
+    	Scanner scan = new Scanner(path);
+    	
+    	scan.useDelimiter("/");
+    	
+    	String curr = path;
+    	
+    	while (scan.hasNext()) {
+    		curr = scan.next();
+    	}
+    	
+    	    	
+    	return curr;
     }
 }
