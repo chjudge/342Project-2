@@ -6,10 +6,31 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Launch serverHTTP",
+            "request": "launch",
+            "mainClass": "serverHTTP",
+            "projectName": "Project 2_2588e42d"
+        },
+        {
+            "type": "java",
+            "name": "Launch clientHTTP",
+            "request": "launch",
+            "mainClass": "clientHTTP",
+            "args": [
+                "127.0.0.1",
+                "me.jpg"
+            ],
+            "projectName": "Project 2_2588e42d"
+        },
+        {
+            "type": "java",
             "name": "Launch Current File",
             "request": "launch",
             "mainClass": "${file}",
-            "args": "www.example.com",
+            "args": [
+                "127.0.0.1",
+                "me.jpg"
+            ]
         }
     ]
 }

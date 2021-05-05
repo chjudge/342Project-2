@@ -29,14 +29,14 @@ public class serverHTTP {
         try {
             // create a ServerSocket object connected to port 80
             serverSocket = new ServerSocket(PORT);
-            //stop listening for connections after 30 seconds
+            // stop listening for connections after 30 seconds
             serverSocket.setSoTimeout(30000);
-            System.out.println(CURRENT_DIRECTORY.toString());
 
             while (true) {
                 System.out.println("\nListening for connection on port " + PORT + "...");
                 // This socket is only created when a client connects to this server
                 Socket socket = serverSocket.accept();
+                System.out.println("Connected to a client\n");
 
                 // read data over the socket
                 InputStreamReader streamReader = new InputStreamReader(socket.getInputStream());
@@ -45,7 +45,8 @@ public class serverHTTP {
                 OutputStream outStream = socket.getOutputStream();
                 PrintWriter writer = new PrintWriter(outStream, true);
 
-                //get file name from the request
+                System.out.println("Getting request from client...");
+                // get file name from the request
                 String line = reader.readLine();
                 if (line.startsWith("GET")) {
                     fileName = line.substring(line.indexOf('/'), line.lastIndexOf("HTTP") - 1);
@@ -55,7 +56,6 @@ public class serverHTTP {
                 }
                 // read in HTTP request
                 while (!line.isEmpty()) {
-                    System.out.println(line);
                     line = reader.readLine();
                 }
 
@@ -63,8 +63,6 @@ public class serverHTTP {
 
                 // send requested file
                 File file = new File(CURRENT_DIRECTORY + fileName);
-
-                System.out.println(file.getAbsolutePath());
 
                 StringBuilder sb = new StringBuilder(8096);
 
@@ -75,11 +73,8 @@ public class serverHTTP {
                 }
                 sb.append("Date: " + new Date() + END);
                 sb.append("Server: my custom server :)" + END);
-                
                 sb.append("Connection: closed" + END);
                 sb.append(END);
-
-                System.out.println(sb.toString());
 
                 writer.write(sb.toString());
                 writer.flush();
@@ -88,6 +83,7 @@ public class serverHTTP {
 
                 // send file to client
                 if (file.exists() && !file.isDirectory()) {
+                    System.out.println("Sending requested file to client...");
                     try {
                         FileInputStream fileStream = new FileInputStream(file);
 
@@ -108,7 +104,8 @@ public class serverHTTP {
                         return;
                     }
                 } else {
-                    //send 404 page
+                    System.out.println("Sending 404 page to client...");
+                    // send 404 page
                     sb.append("<!DOCTYPE html>" + END);
                     sb.append("<html>" + END);
                     sb.append("<head>" + END);
@@ -116,13 +113,12 @@ public class serverHTTP {
                     sb.append("</head>" + END);
                     sb.append("<body>" + END);
                     sb.append("<h1>Not Found</h1>" + END);
-                    sb.append("<p>The requested URL /" + fileName + " was not found on this server.</p>" + END);
+                    sb.append("<p>The requested URL " + fileName + " was not found on this server.</p>" + END);
                     sb.append("<body>" + END);
                     sb.append("</html>" + END);
 
                     writer.write(sb.toString());
 
-                    
                 }
 
                 System.out.println("Done responding to client...");
