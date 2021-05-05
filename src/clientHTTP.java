@@ -46,6 +46,7 @@ public class clientHTTP {
 
             PrintWriter writer = new PrintWriter(mySocket.getOutputStream(), true);
 
+            //build HTTP request
             writer.println("GET /" + path + " HTTP/1.1");
             writer.println("Host: " + host + ":" + port);
             writer.println("Accept: text/*");
