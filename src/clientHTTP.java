@@ -57,11 +57,11 @@ public class clientHTTP {
                 }
             }
 
-            System.out.println(sb.toString());
+//            System.out.println(sb.toString());
             
             String newStr = PARSE(sb.toString());
             
-            System.out.println("Parsed String: " + newStr);
+            System.out.println("Parsed String: \n" + newStr);
 
 
             mySocket.close();
