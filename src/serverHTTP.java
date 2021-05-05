@@ -1,4 +1,3 @@
-
 /** Author:  Clayton Judge
   * Course:  COMP 342 Data Communications and Networking
   * Date:    5 May 2021
@@ -14,17 +13,21 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
 
 public class serverHTTP {
-    private final static int PORT = 80;
-    private final static String END = "\r\n";
+    private static final int PORT = 80;
+    private static final String END = "\r\n";
+    private static final Path CURRENT_DIRECTORY = Paths.get(System.getProperty("user.dir"));
     private static String fileName = "";
 
     public static void main(String[] args) {
         try {
             // create a ServerSocket object connected to port 80
             ServerSocket serverSocket = new ServerSocket(PORT);
+            System.out.println(CURRENT_DIRECTORY.toString());
 
             while (true) {
                 System.out.println("\nListening for connection on port " + PORT + "...");
@@ -38,9 +41,10 @@ public class serverHTTP {
                 OutputStream outStream = socket.getOutputStream();
                 PrintWriter writer = new PrintWriter(outStream, true);
 
+                //get file name from the request
                 String line = reader.readLine();
                 if (line.startsWith("GET")) {
-                    fileName = line.substring(line.indexOf('/'), line.indexOf("HTTP") - 1);
+                    fileName = line.substring(line.indexOf('/'), line.lastIndexOf("HTTP") - 1);
                     if (fileName.trim().equals("/")) {
                         fileName = "/index.html";
                     }
@@ -57,22 +61,16 @@ public class serverHTTP {
                 // send requested file
                 File file = new File(fileName);
 
-                System.out.println(file.exists() ? "the file is here" : "404 no file ");
-
                 StringBuilder sb = new StringBuilder(8096);
 
                 if (file.exists()) {
                     sb.append("HTTP/1.1 200 OK" + END);
-                    sb.append("Content-Length: " + file.length() + END);
                 } else {
-                    sb.append("HTTP/1/1 404 Not Found");
-                    sb.append("Content-Length: ");
+                    sb.append("HTTP/1/1 404 Not Found" + END);
                 }
                 sb.append("Date: " + new Date() + END);
                 sb.append("Server: my custom server :)" + END);
-                if (fileName.endsWith("html")) {
-                    sb.append("Content-Type: text/html" + END);
-                }
+                
                 sb.append("Connection: closed" + END);
                 sb.append(END);
 
@@ -93,7 +91,7 @@ public class serverHTTP {
                         int bytes;
                         // add bytes to the buffer until the end of the file is reached
                         while ((bytes = fileStream.read(buffer)) != -1) {
-                            System.out.write(buffer, 0, bytes);
+                            // System.out.write(buffer, 0, bytes);
                             outStream.write(buffer, 0, bytes);
                             outStream.flush();
                         }
