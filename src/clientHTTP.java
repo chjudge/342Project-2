@@ -56,15 +56,15 @@ public class clientHTTP {
 
             // run the parse on the server response
             boolean fileExists = PARSE(reader);
-            // boolean fileExists = true;
+
+            System.out.println(path);
 
             // save to path
             if (fileExists) {
-                if (path.lastIndexOf('/') > 0) {
-                    path = path.substring(0, path.lastIndexOf('/'));
-                } else if (path.lastIndexOf('\\') > 0) {
-                    path = path.substring(0, path.lastIndexOf('\\'));
+                if (path.lastIndexOf('\\') > 0) {
+                    path = path.substring(path.lastIndexOf('\\') + 1);
                 }
+                System.out.println(path);
                 SAVE(reader, path);
                 // confirmation message
                 System.out.println("Saved to: " + path);
