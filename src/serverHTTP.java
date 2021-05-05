@@ -13,6 +13,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
@@ -24,9 +25,12 @@ public class serverHTTP {
     private static String fileName = "";
 
     public static void main(String[] args) {
+        ServerSocket serverSocket = null;
         try {
             // create a ServerSocket object connected to port 80
-            ServerSocket serverSocket = new ServerSocket(PORT);
+            serverSocket = new ServerSocket(PORT);
+            //stop listening for connections after 30 seconds
+            serverSocket.setSoTimeout(30000);
             System.out.println(CURRENT_DIRECTORY.toString());
 
             while (true) {
@@ -48,7 +52,6 @@ public class serverHTTP {
                     if (fileName.trim().equals("/")) {
                         fileName = "/index.html";
                     }
-                    fileName = fileName.substring(1);
                 }
                 // read in HTTP request
                 while (!line.isEmpty()) {
@@ -59,14 +62,16 @@ public class serverHTTP {
                 System.out.println("\nSending response...");
 
                 // send requested file
-                File file = new File(fileName);
+                File file = new File(CURRENT_DIRECTORY + fileName);
+
+                System.out.println(file.getAbsolutePath());
 
                 StringBuilder sb = new StringBuilder(8096);
 
-                if (file.exists()) {
+                if (file.exists() && !file.isDirectory()) {
                     sb.append("HTTP/1.1 200 OK" + END);
                 } else {
-                    sb.append("HTTP/1/1 404 Not Found" + END);
+                    sb.append("HTTP/1.1 404 Not Found" + END);
                 }
                 sb.append("Date: " + new Date() + END);
                 sb.append("Server: my custom server :)" + END);
@@ -82,7 +87,7 @@ public class serverHTTP {
                 sb.delete(0, sb.length());
 
                 // send file to client
-                if (file.exists()) {
+                if (file.exists() && !file.isDirectory()) {
                     try {
                         FileInputStream fileStream = new FileInputStream(file);
 
@@ -128,10 +133,16 @@ public class serverHTTP {
                 reader.close();
                 socket.close();
             }
-
-            // serverSocket.close();
+        } catch (SocketTimeoutException e) {
+            System.err.println("Error: Connection timed out");
         } catch (IOException e) {
             System.err.println("Error: Connection terminated unexpectedly");
+        } finally {
+            try {
+                serverSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
