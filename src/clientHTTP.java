@@ -4,6 +4,9 @@
   * Description: Client side of an HTTP application
 */
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -23,6 +26,7 @@ public class clientHTTP {
         }
         //get host and file path from command line argument
         host = args[0];
+
         if (args.length > 1) {
             path = args[1];
         }
@@ -61,10 +65,23 @@ public class clientHTTP {
             
             String newStr = PARSE(sb.toString());
             
-            System.out.println("Parsed String: \n" + newStr);
+            File out = new File(path);
+            System.out.println(out.getAbsolutePath());
+            FileOutputStream fOut = new FileOutputStream(out);
+            
+            System.out.println(path);
+            
+            byte[] newStrB = newStr.getBytes();
+            fOut.write(newStrB);
+            
+            //System.out.println("Parsed String: \n" + newStr);
 
 
+            fOut.flush();
+            fOut.close();
+            
             mySocket.close();
+         
         } catch (IOException e) {
             System.err.println("Error: Connection terminated unexpectedly");
         }
