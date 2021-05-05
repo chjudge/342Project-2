@@ -1,3 +1,4 @@
+
 /** Author:  Clayton Judge
   * Course:  COMP 342 Data Communications and Networking
   * Date:    5 May 2021
@@ -59,13 +60,14 @@ public class serverHTTP {
                     line = reader.readLine();
                 }
 
-                System.out.println("\nSending response...");
+                System.out.println("Sending response...");
 
-                // send requested file
+                // open requested file
                 File file = new File(CURRENT_DIRECTORY + fileName);
 
                 StringBuilder sb = new StringBuilder(8096);
 
+                // build HTTP responese message
                 if (file.exists() && !file.isDirectory()) {
                     sb.append("HTTP/1.1 200 OK" + END);
                 } else {
@@ -76,10 +78,9 @@ public class serverHTTP {
                 sb.append("Connection: closed" + END);
                 sb.append(END);
 
+                // send the message to the client
                 writer.write(sb.toString());
                 writer.flush();
-
-                sb.delete(0, sb.length());
 
                 // send file to client
                 if (file.exists() && !file.isDirectory()) {
@@ -92,7 +93,6 @@ public class serverHTTP {
                         int bytes;
                         // add bytes to the buffer until the end of the file is reached
                         while ((bytes = fileStream.read(buffer)) != -1) {
-                            // System.out.write(buffer, 0, bytes);
                             outStream.write(buffer, 0, bytes);
                             outStream.flush();
                         }
