@@ -50,7 +50,7 @@ public class clientHTTP {
             writer.println("Connection: Close");
             writer.println();
 
-            System.out.println("response:");
+//            System.out.println("response:");
 
             StringBuilder sb = new StringBuilder();
 
@@ -64,11 +64,13 @@ public class clientHTTP {
                 }
             }
 
-            //run the parse 
+            //run the parse on the server response
             String newStr = PARSE(sb.toString());
             
+            // save to path
             SAVE(newStr, path);
            
+            //confirmation message
             System.out.println("Saved to: " + path);
             
             mySocket.close();
@@ -78,14 +80,22 @@ public class clientHTTP {
         }
     }
     
+    /**
+     * parse data from response
+     * @param str server response with header and data
+     * @return data alone without header
+     */
     public static String PARSE(String str) {
     	
-    	String newStr = "";
+    	String newStr = ""; //initialize string for parsed
     	
     	Scanner scan = new Scanner(str);
-    	while (scan.hasNext()) {
+    	
+    	//read through header
+    	while (scan.hasNext()) { 
     		String curr = scan.next();
     		
+    		//break loop after the connection termination message
     		if (curr.equals("Connection:")) {
     			scan.nextLine();
     			scan.nextLine();
@@ -93,18 +103,30 @@ public class clientHTTP {
     		}
     	}
     	
+    	//read rest of string (body of response)
     	while (scan.hasNextLine()) {
     		newStr += scan.nextLine() + "\n";
     	}
     	
+    	scan.close();
     	return newStr;
     }
     
+    /**
+     * saves the data to a file
+     * @param str data to save to file
+     * @param path file where data is to be saved
+     * @throws IOException
+     */
+    
     public static void SAVE(String str, String path) throws IOException {
-        File out = new File(path);
+    	
+        File out = new File(path); //open file 
         FileOutputStream fOut = new FileOutputStream(out);
         
+        // convert string to bytes for fos
         byte[] strB = str.getBytes();
+        // write string to file
         fOut.write(strB);
        
         fOut.flush();
