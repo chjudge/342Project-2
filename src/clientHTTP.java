@@ -1,3 +1,4 @@
+
 /** Author:  Clayton Judge
   * Course:  COMP 342 Data Communications and Networking
   * Date:    5 May 2021
@@ -5,37 +6,39 @@
 */
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Scanner;
-
 
 public class clientHTTP {
     private static String host;
     private static String path = null;
     private final static int port = 80;
+
     public static void main(String[] args) {
-        //return if no host specified
+        // return if no host specified
         if (args.length < 1) {
             System.err.println("Error: insufficient command line arguments");
             return;
         }
-        //get host and file path from command line argument
+        // get host and file path from command line argument
         host = args[0];
 
         if (args.length > 1) {
             path = args[1];
+            if (path.isBlank()) {
+                path = "index.html";
+            }
         } else {
-        	path = "index.html";
+            path = "index.html";
         }
         try {
-            //create a socket that connects to the server on port 80
+            // create a socket that connects to the server on port 80
             Socket mySocket = new Socket(host, port);
 
-            System.out.println("Connection established");
+            System.out.println("Connection established to " + host);
 
             InputStreamReader streamReader = new InputStreamReader(mySocket.getInputStream());
 
@@ -43,90 +46,81 @@ public class clientHTTP {
 
             PrintWriter writer = new PrintWriter(mySocket.getOutputStream(), true);
 
-            writer.println("GET / HTTP/1.1");
+            writer.println("GET /" + path + " HTTP/1.1");
             writer.println("Host: " + host + ":" + port);
+            writer.println("Accept: text/*");
             writer.println("Connection: Close");
             writer.println();
 
-//            System.out.println("response:");
+            writer.flush();
 
-            StringBuilder sb = new StringBuilder();
+            // run the parse on the server response
+            boolean fileExists = PARSE(reader);
+            // boolean fileExists = true;
 
-            for (int i = 0;;) {
-                if (reader.ready()) {
-                    while (i != -1) {
-                        i = reader.read();
-                        sb.append((char) i);
-                    }
-                    break;
+            // save to path
+            if (fileExists) {
+                if (path.lastIndexOf('/') > 0) {
+                    path = path.substring(0, path.lastIndexOf('/'));
+                } else if (path.lastIndexOf('\\') > 0) {
+                    path = path.substring(0, path.lastIndexOf('\\'));
                 }
+                SAVE(reader, path);
+                // confirmation message
+                System.out.println("Saved to: " + path);
             }
 
-            //run the parse on the server response
-            String newStr = PARSE(sb.toString());
-            
-            // save to path
-            SAVE(newStr, path);
-           
-            //confirmation message
-            System.out.println("Saved to: " + path);
-            
+            reader.close();
+            writer.close();
             mySocket.close();
-         
+
         } catch (IOException e) {
             System.err.println("Error: Connection terminated unexpectedly");
         }
     }
-    
+
     /**
      * parse data from response
-     * @param str server response with header and data
-     * @return data alone without header
-     */
-    public static String PARSE(String str) {
-    	
-    	String newStr = ""; //initialize string for parsed
-    	
-    	Scanner scan = new Scanner(str);
-    	
-    	//read through header
-    	while (scan.hasNext()) { 
-    		String curr = scan.next();
-    		
-    		//break loop after the connection termination message
-    		if (curr.equals("Connection:")) {
-    			scan.nextLine();
-    			scan.nextLine();
-    			break;
-    		}
-    	}
-    	
-    	//read rest of string (body of response)
-    	while (scan.hasNextLine()) {
-    		newStr += scan.nextLine() + "\n";
-    	}
-    	
-    	scan.close();
-    	return newStr;
-    }
-    
-    /**
-     * saves the data to a file
-     * @param str data to save to file
-     * @param path file where data is to be saved
+     * 
+     * @param reader BufferedReader to read the HTTP response from the server
+     * @return true if the server has the requested file, false otherwise
      * @throws IOException
      */
-    
-    public static void SAVE(String str, String path) throws IOException {
-    	
-        File out = new File(path); //open file 
-        FileOutputStream fOut = new FileOutputStream(out);
-        
-        // convert string to bytes for fos
-        byte[] strB = str.getBytes();
-        // write string to file
-        fOut.write(strB);
-       
+    public static boolean PARSE(BufferedReader reader) throws IOException {
+        String line = reader.readLine(); // initialize string for parsed
+
+        if (line.contains("404")) {
+            while (!line.isBlank()) {
+                line = reader.readLine();
+            }
+            return false;
+        } else if (line.contains("200")) {
+            while (!line.isBlank()) {
+                line = reader.readLine();
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * saves the data to a file
+     * 
+     * @param reader data to save to file
+     * @param path   file where data is to be saved
+     * @throws IOException
+     */
+
+    public static void SAVE(BufferedReader reader, String path) throws IOException {
+        File out = new File(path); // open file
+        FileWriter fOut = new FileWriter(out);
+
+        String line = reader.readLine();
+        while (line != null) {
+            fOut.write(line + "\n");
+            line = reader.readLine();
+        }
+
         fOut.flush();
         fOut.close();
     }
