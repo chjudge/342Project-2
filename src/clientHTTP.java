@@ -19,6 +19,7 @@ public class clientHTTP {
     private final static int port = 80;
 
 
+
     public static void main(String[] args) {
         // return if no host specified
         if (args.length < 1) {
@@ -37,6 +38,7 @@ public class clientHTTP {
         } else {
             path = "index.html";
 
+            
         }
         try {
             // create a socket that connects to the server on port 80
@@ -50,15 +52,15 @@ public class clientHTTP {
 
             PrintWriter writer = new PrintWriter(mySocket.getOutputStream(), true);
 
+            //build HTTP request
+
             writer.println("GET /" + path + " HTTP/1.1");
             writer.println("Host: " + host + ":" + port);
             writer.println("Accept: text/*");
             writer.println("Connection: Close");
             writer.println();
 
-
             writer.flush();
-
 
 
             // run the parse on the server response
