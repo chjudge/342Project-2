@@ -5,6 +5,7 @@
 */
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -29,6 +30,8 @@ public class clientHTTP {
 
         if (args.length > 1) {
             path = args[1];
+        } else {
+        	path = "index.html";
         }
         try {
             //create a socket that connects to the server on port 80
@@ -61,24 +64,12 @@ public class clientHTTP {
                 }
             }
 
-//            System.out.println(sb.toString());
-            
+            //run the parse 
             String newStr = PARSE(sb.toString());
             
-            File out = new File(path);
-            System.out.println(out.getAbsolutePath());
-            FileOutputStream fOut = new FileOutputStream(out);
-            
-            System.out.println(path);
-            
-            byte[] newStrB = newStr.getBytes();
-            fOut.write(newStrB);
-            
-            //System.out.println("Parsed String: \n" + newStr);
-
-
-            fOut.flush();
-            fOut.close();
+            SAVE(newStr, path);
+           
+            System.out.println("Saved to: " + path);
             
             mySocket.close();
          
@@ -107,5 +98,16 @@ public class clientHTTP {
     	}
     	
     	return newStr;
+    }
+    
+    public static void SAVE(String str, String path) throws IOException {
+        File out = new File(path);
+        FileOutputStream fOut = new FileOutputStream(out);
+        
+        byte[] strB = str.getBytes();
+        fOut.write(strB);
+       
+        fOut.flush();
+        fOut.close();
     }
 }
